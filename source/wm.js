@@ -33,6 +33,8 @@ const WMJS = (function() {
             this.onmaximize = function(e) { }
             this.onminimize = function(e) { }
             this.onrestore = function(e) { }
+            this.onactivate = function(e) { }
+            this.ondeactivate = function(e) { }
         }
 
         /**
@@ -175,6 +177,7 @@ const WMJS = (function() {
                 return;
 
             this.wm.activate(this);
+            this.onactivate?.call();
         }
 
         /**
@@ -316,15 +319,26 @@ const WMJS = (function() {
          */
         activate(_wnd) {
             const wnd = (_wnd instanceof WM_Window) ? _wnd : this.findWindow(_wnd);
-            var highestZIndex = this.zIndexStartOffset;
-            var highestZIndexWnd = wnd;
+            var highestZIndex = parseInt(wnd.baseElement.style.zIndex);
 
             this.windows.forEach((w, i, a)=>{
                 if((a[i] == null) || (a[i].id == wnd.id))
                     return;
                 
+                if(a[i].baseElement.classList.contains('active')) {
+                    a[i].baseElement.classList.remove('active');
+                    a[i].ondeactivate?.call();
+                }
+
                 const zIndex = parseInt(w.baseElement.style.zIndex);
+
+                if(zIndex > highestZIndex) {
+                    highestZIndex = zIndex;
+                }
             });
+
+            wnd.baseElement.style.zIndex = highestZIndex + 1;
+            wnd.baseElement.classList.add('active');
         }
     }
 

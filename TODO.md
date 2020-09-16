@@ -8,3 +8,6 @@
 
  - There is more but I forgot to add it.
  
+ - Add window icon support.
+
+ - Add standard dialogs (alert, etc.)
