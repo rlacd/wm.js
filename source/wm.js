@@ -20,6 +20,7 @@ const WMJS = (function() {
 
             this.registered = false;
             this.shown = false;
+            this.maximized = false;
 
             /** @type {WindowManager} */
             this.wm = wm;
@@ -32,9 +33,6 @@ const WMJS = (function() {
             this.onmaximize = function(e) { }
             this.onminimize = function(e) { }
             this.onrestore = function(e) { }
-
-            // Create the window
-            this._createWindow(params);
         }
 
         /**
@@ -44,6 +42,7 @@ const WMJS = (function() {
         _createWindow(params) {
             // 1 - Construct window
             this.baseElement.classList.add('wm-window');
+            this.baseElement.style.zIndex = (this.wm.zIndexStartOffset + this.id + 1);
 
             //  1.1 - Construct titlebar
             const titleBar = document.createElement('div');
@@ -55,8 +54,28 @@ const WMJS = (function() {
             const controlBox = document.createElement('div');
             controlBox.classList.add('control-box');
             controlBox.insertAdjacentHTML('beforeend', '<button role="minimize">─</button>'
-             + '<button role="maximize">▢</button>' //TODO check if window is resizable
+             + (params.resizable ? '<button role="maximize">▢</button>' : '') //TODO check if window is resizable
              + '<button role="close">✕</button>');
+
+            if(params.resizable) {
+                titleBarTitle.addEventListener('dblclick', ()=>{
+                    this.toggleMaximize();
+                });
+
+                controlBox.querySelector('button[role="maximize"]').addEventListener('click', ()=>{
+                    this.toggleMaximize();
+                });
+
+                controlBox.querySelector('button[role="minimize"]').addEventListener('click', ()=>{
+                    this.hide();
+                    this.onminimize?.call();
+                });
+
+                controlBox.querySelector('button[role="close"]').addEventListener('click', ()=>{
+                    this.onclose?.call();
+                    this.close();
+                });
+            }
 
             titleBar.appendChild(titleBarTitle);
             titleBar.appendChild(controlBox);
@@ -77,6 +96,9 @@ const WMJS = (function() {
             //  2.1 - Register components
             this.baseElement.appendChild(titleBar);
             this.baseElement.appendChild(contentsContainer);
+            this.baseElement.addEventListener('mousedown', ()=>{
+                this.activate();
+            });
 
             // 3 - Create draggable handlers/resizable handlers (TODO)
         }
@@ -87,6 +109,40 @@ const WMJS = (function() {
         _registerWindow() {    
             this.wm.container.appendChild(this.baseElement);
             this.registered = true;
+        }
+        
+        /**
+         * Toggles whether the window is maximized.
+         */
+        toggleMaximize() {
+            if(!this.maximized) {
+                this._ogBounds = {
+                    height: this.baseElement.style.height,
+                    width: this.baseElement.style.width,
+                    x: this.baseElement.style.left,
+                    y: this.baseElement.style.top
+                };
+
+                this.baseElement.style.height = "100%";
+                this.baseElement.style.width = "100%";
+                this.baseElement.style.left = "0px";
+                this.baseElement.style.top = "0px";
+
+                this.baseElement.classList.add('maximized');
+                this.maximized = true;
+
+                this.onmaximize?.call();
+            } else {
+                this.baseElement.style.height = this._ogBounds.height;
+                this.baseElement.style.width = this._ogBounds.width;
+                this.baseElement.style.left = this._ogBounds.x;
+                this.baseElement.style.top = this._ogBounds.y;
+
+                this.baseElement.classList.remove('maximized');
+                this.maximized = false;
+
+                this.onrestore?.call();
+            }
         }
 
         /**
@@ -112,23 +168,50 @@ const WMJS = (function() {
         }
 
         /**
+         * Activates the window
+         */
+        activate() {
+            if(this.baseElement.classList.contains('active'))
+                return;
+
+            this.wm.activate(this);
+        }
+
+        /**
          * Shows the window. If the window is already shown, this function will do nothing.
          */
         show() {
             if(this.shown)
                 return;
             
-            this.onopen?.call();
-            
-            if(!this.registered)
+            if(!this.registered) {
                 this._registerWindow();
+                this.onopen?.call();
+            }
             
             this.baseElement.style.display = "flex";
             this.shown = true;
 
             this.onshown?.call();
 
-            //TODO code here to activate window
+            this.activate();
+        }
+
+        /**
+         * Hides the window. `onminimize` only gets called if it is performed via the UI.
+         */
+        hide() {
+            if(!this.shown) return;
+
+            this.baseElement.style.display = "none";
+            this.shown = false;
+        }
+
+        /**
+         * Closes the window. Once it has been closed, the window is destroyed.
+         */
+        close() {
+            wm.destroy(this);
         }
     }
 
@@ -154,6 +237,7 @@ const WMJS = (function() {
 
             /** Variables */
             this.container = containerEl;
+            /** @type {WM_Window[]} */
             this.windows = [];
             this.zIndexStartOffset = 10;
 
@@ -182,9 +266,65 @@ const WMJS = (function() {
             }, params);
 
             const wnd = new WM_Window(this, options);
-            wnd.id = (++this._createdWindows);
+            wnd.id = (this._createdWindows++);
+            wnd._createWindow(options);
             this.windows.push(wnd);
             return wnd;
+        }
+
+        /**
+         * Finds a window by id.
+         * @param {Number} id The ID of the window to find.
+         */
+        findWindow(id) {
+            return this.windows.find((x)=>x?.id == id);
+        }
+
+        /**
+         * Destroys all windows. No events will be executed upon destruction.
+         */
+        destroyAll() {
+            this.windows.forEach((v, i)=>{
+                this.container.removeChild(v.baseElement);
+                v.wm = null;
+                v.baseElement = null;
+                this.windows[i] = null;
+                delete this.windows[i];
+            });
+        }
+
+        /**
+         * Destroys a window.
+         * @param {WM_Window|Number} _wnd The window to destroy.
+         */
+        destroy(_wnd) {
+            const wnd = (_wnd instanceof WM_Window) ? _wnd : this.findWindow(_wnd);
+
+            if(!wnd.wm)
+                return;
+
+            this.container.removeChild(wnd.baseElement);
+            wnd.baseElement = null;
+            const wndIndex = this.windows.indexOf(wnd);
+            this.windows[wndIndex] = null;
+            delete this.windows[wndIndex];
+        }
+
+        /**
+         * Activates a window.
+         * @param {WM_Window|Number} _wnd The window to activate.
+         */
+        activate(_wnd) {
+            const wnd = (_wnd instanceof WM_Window) ? _wnd : this.findWindow(_wnd);
+            var highestZIndex = this.zIndexStartOffset;
+            var highestZIndexWnd = wnd;
+
+            this.windows.forEach((w, i, a)=>{
+                if((a[i] == null) || (a[i].id == wnd.id))
+                    return;
+                
+                const zIndex = parseInt(w.baseElement.style.zIndex);
+            });
         }
     }
 
