@@ -1,5 +1,4 @@
-![wmjs logo](/res/wmjs-logo.png)
-# wm.js
+![wmjs logo](/res/wmjs-logo-small.png)
 
 A rock solid, easy to use window manager for the web, written in JavaScript.
 
