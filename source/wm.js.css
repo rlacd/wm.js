@@ -9,6 +9,7 @@ wm.js (C) acdra1n 2020. Licensed under GNU GPLv3.
     border-radius: 3px;
     display: flex;
     flex-direction: column;
+    box-shadow: black 0px 0px 5px 0px;
 }
 
 .wm-window>.titlebar {
@@ -16,11 +17,36 @@ wm.js (C) acdra1n 2020. Licensed under GNU GPLv3.
     flex-direction: row;
     width: 100%;
     height: 32px;
-    background-color: black;
-    color: white;
+    background-color: white;
+    color: black;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+}
+
+.wm-window>.titlebar>.title {
+    /* Normalize element style */
+    margin: 0;
+    padding: 0;
+
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    padding-left: 8px;
+    flex: 1;
+    line-height: 1em;
+    font-family: verdana;
+    font-size: 12px;
 }
 
 .wm-window>.content {
     display: flex;
     flex: 1;
+}
+
+.wm-window.active>.titlebar {
+    background: blue;
 }

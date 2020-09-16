@@ -49,6 +49,11 @@ const WMJS = (function() {
             const titleBar = document.createElement('div');
             titleBar.classList.add('titlebar');
 
+            const titleBarTitle = document.createElement('span');
+            titleBarTitle.classList.add('title');
+
+            titleBar.appendChild(titleBarTitle);
+
             //  1.2 - Construct contents container
             const contentsContainer = document.createElement('div');
             contentsContainer.classList.add('content');
@@ -60,7 +65,7 @@ const WMJS = (function() {
             this.baseElement.style.left = (typeof params.x == 'string') ? params.x : params.x + "px";
             this.baseElement.style.top = (typeof params.y == 'string') ? params.y : params.y + "px";
 
-            titleBar.innerText = params.title;
+            titleBarTitle.innerText = params.title;
 
             //  2.1 - Register components
             this.baseElement.appendChild(titleBar);
@@ -99,6 +104,8 @@ const WMJS = (function() {
             
             this.baseElement.style.display = "flex";
             this.shown = true;
+
+            //TODO code here to activate window
         }
     }
 
@@ -111,6 +118,8 @@ const WMJS = (function() {
          * @param {String|HTMLElement} containerEl The container element to use for the window manager.
          */
         constructor(containerEl) {
+            // Check if provided container is a valid element.
+
             if(!(containerEl instanceof HTMLElement))
                 containerEl = document.querySelector(containerEl);
         
@@ -120,9 +129,15 @@ const WMJS = (function() {
             if(containerEl._wm)
                 throw new Error("The specified container already has a window manager.");
 
+            /** Variables */
             this.container = containerEl;
             this.windows = [];
+            this.zIndexStartOffset = 10;
+
+            /** Internal variables (these should not be touched and are therefore prefixed) */
             this._createdWindows = 0;
+
+            containerEl._wm = {};
         }
 
         /**
