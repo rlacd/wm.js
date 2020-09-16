@@ -42,9 +42,50 @@ wm.js (C) acdra1n 2020. Licensed under GNU GPLv3.
     font-size: 12px;
 }
 
+.wm-window>.titlebar>.control-box {
+    height: 100%;
+    display: flex;
+}
+
+.wm-window>.titlebar>.control-box>button {
+    height: 100%;
+    width: 32px;
+    background: transparent;
+    border: none;
+    color: black;
+    cursor: pointer;
+    outline: 0;
+    margin: 0;
+    line-height: 1em;
+}
+
+/* TODO: use rgba to blend with background */
+.wm-window>.titlebar>.control-box>button:hover {
+	background: rgba(0, 0, 0, 0.1);
+}
+
+.wm-window>.titlebar>.control-box>button:active {
+	background: rgba(0, 0, 0, 0.2);
+}
+
+.wm-window>.titlebar>.control-box>button[role="close"] {
+    border-top-right-radius: 3px;
+}
+
+.wm-window>.titlebar>.control-box>button[role="close"]:hover {
+    background: #ee0000;
+    color: white;
+}
+
+.wm-window>.titlebar>.control-box>button[role="close"]:active {
+    background: #aa0000;
+    color: white;
+}
+
 .wm-window>.content {
     display: flex;
     flex: 1;
+    box-sizing: border-box;
 }
 
 .wm-window.active>.titlebar {

@@ -7,7 +7,7 @@ wm.js (C) acdra1n 2020. Licensed under GNU GPLv3.
  */
 const WMJS = (function() {
     /**
-     * Window manager window.
+     * [Internal] Window manager window object.
      */
     class WM_Window {
         /**
@@ -52,7 +52,14 @@ const WMJS = (function() {
             const titleBarTitle = document.createElement('span');
             titleBarTitle.classList.add('title');
 
+            const controlBox = document.createElement('div');
+            controlBox.classList.add('control-box');
+            controlBox.insertAdjacentHTML('beforeend', '<button role="minimize">─</button>'
+             + '<button role="maximize">▢</button>' //TODO check if window is resizable
+             + '<button role="close">✕</button>');
+
             titleBar.appendChild(titleBarTitle);
+            titleBar.appendChild(controlBox);
 
             //  1.2 - Construct contents container
             const contentsContainer = document.createElement('div');
@@ -98,6 +105,7 @@ const WMJS = (function() {
 
         /**
          * Returns the content container element (essentially the element used for window contents).
+         * @returns {HTMLElement} The content container element.
          */
         getContentContainer() {
             return this.baseElement.querySelector('content');
@@ -110,11 +118,15 @@ const WMJS = (function() {
             if(this.shown)
                 return;
             
+            this.onopen?.call();
+            
             if(!this.registered)
                 this._registerWindow();
             
             this.baseElement.style.display = "flex";
             this.shown = true;
+
+            this.onshown?.call();
 
             //TODO code here to activate window
         }
@@ -154,6 +166,7 @@ const WMJS = (function() {
         /**
          * Creates a new empty window.
          * @param params The window parameters to use.
+         * @returns {WM_Window} The newly created window object.
          */
         createWindow(params) {
             const options = {};
