@@ -5,6 +5,22 @@ wm.js (C) acdra1n 2020. Licensed under GNU GPLv3.
 /* Default Window Manager styles */
 
 .wm-window {
-    background-color: white;
+    background-color: #dedede;
     border-radius: 3px;
+    display: flex;
+    flex-direction: column;
+}
+
+.wm-window>.titlebar {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 32px;
+    background-color: black;
+    color: white;
+}
+
+.wm-window>.content {
+    display: flex;
+    flex: 1;
 }

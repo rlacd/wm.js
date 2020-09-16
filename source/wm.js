@@ -14,11 +14,16 @@ const WMJS = (function() {
          * Creates a new window.
          * @param {Object} params The parameters to use.
          */
-        constructor(params) {
+        constructor(wm, params) {
             /** @type {HTMLElement} */
             this.baseElement = document.createElement('div');
 
             this.registered = false;
+            this.shown = false;
+
+            /** @type {WindowManager} */
+            this.wm = wm;
+            this.id = 0;
 
             /* Events */
             this.onopen = function(e) { }
@@ -32,23 +37,68 @@ const WMJS = (function() {
             this._createWindow(params);
         }
 
-        _createWindow() {
-            
+        /**
+         * [Internal] Creates the window and its components.
+         * @param params The window creation parameters to use.
+         */
+        _createWindow(params) {
+            // 1 - Construct window
+            this.baseElement.classList.add('wm-window');
+
+            //  1.1 - Construct titlebar
+            const titleBar = document.createElement('div');
+            titleBar.classList.add('titlebar');
+
+            //  1.2 - Construct contents container
+            const contentsContainer = document.createElement('div');
+            contentsContainer.classList.add('content');
+
+            // 2 - Apply parameters
+            this.baseElement.style.position = "absolute";
+            this.baseElement.style.height = (typeof params.height == 'string') ? params.height : params.height + "px";
+            this.baseElement.style.width = (typeof params.width == 'string') ? params.width : params.width + "px";
+            this.baseElement.style.left = (typeof params.x == 'string') ? params.x : params.x + "px";
+            this.baseElement.style.top = (typeof params.y == 'string') ? params.y : params.y + "px";
+
+            titleBar.innerText = params.title;
+
+            //  2.1 - Register components
+            this.baseElement.appendChild(titleBar);
+            this.baseElement.appendChild(contentsContainer);
+
+            // 3 - Create draggable handlers/resizable handlers (TODO)
         }
 
-        /**
-         * [Internal] Registers the window.
-         */
-        _registerWindow() {
+        
+        _registerWindow() {    
+            this.wm.container.appendChild(this.baseElement);
             this.registered = true;
         }
 
-        getBounds() {
+        getWindowRect() {
+            const boundRect = this.baseElement.getBoundingClientRect();
+            
+            return {
+                x: boundRect.x,
+                y: boundRect.y,
+                height: boundRect.height,
+                width: boundRect.width
+            };
+        }
 
+        getContentsContainer() {
+            return this.baseElement.querySelector('content');
         }
 
         show() {
-
+            if(this.shown)
+                return;
+            
+            if(!this.registered)
+                this._registerWindow();
+            
+            this.baseElement.style.display = "flex";
+            this.shown = true;
         }
     }
 
@@ -84,15 +134,16 @@ const WMJS = (function() {
 
             Object.assign(options, {
                 title: "Untitled",
-                height: 100,
-                width: 100,
+                height: 315,
+                width: 450,
                 x: 10,
                 y: 10,
                 resizable: true,
                 draggable: true
             }, params);
 
-            const wnd = new WM_Window(options);
+            const wnd = new WM_Window(this, options);
+            wnd.id = (++this._createdWindows);
             this.windows.push(wnd);
             return wnd;
         }
