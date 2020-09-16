@@ -11,7 +11,7 @@ const WMJS = (function() {
      */
     class WM_Window {
         /**
-         * Creates a new window.
+         * Constructs a new window object.
          * @param {Object} params The parameters to use.
          */
         constructor(wm, params) {
@@ -74,12 +74,17 @@ const WMJS = (function() {
             // 3 - Create draggable handlers/resizable handlers (TODO)
         }
 
-        
+        /**
+         * [Internal] Registers the window.
+         */
         _registerWindow() {    
             this.wm.container.appendChild(this.baseElement);
             this.registered = true;
         }
 
+        /**
+         * Return a rectangle containing the bounds of the current window.
+         */
         getWindowRect() {
             const boundRect = this.baseElement.getBoundingClientRect();
             
@@ -91,10 +96,16 @@ const WMJS = (function() {
             };
         }
 
-        getContentsContainer() {
+        /**
+         * Returns the content container element (essentially the element used for window contents).
+         */
+        getContentContainer() {
             return this.baseElement.querySelector('content');
         }
 
+        /**
+         * Shows the window. If the window is already shown, this function will do nothing.
+         */
         show() {
             if(this.shown)
                 return;
