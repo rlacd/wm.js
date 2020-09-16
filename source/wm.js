@@ -166,7 +166,7 @@ const WMJS = (function() {
          * @returns {HTMLElement} The content container element.
          */
         getContentContainer() {
-            return this.baseElement.querySelector('content');
+            return this.baseElement.querySelector('.content');
         }
 
         /**
