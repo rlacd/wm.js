@@ -214,7 +214,7 @@ const WMJS = (function() {
          * Closes the window. Once it has been closed, the window is destroyed.
          */
         close() {
-            wm.destroy(this);
+            this.wm.destroy(this);
         }
     }
 
