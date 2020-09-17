@@ -77,6 +77,12 @@ const WMJS = (function() {
                     return;
                 
                 const bounds = dragTarget.getBoundingClientRect();
+                
+                dragTarget.querySelectorAll("iframe").forEach((frame)=>{
+                    frame.style.pointerEvents = frame._drag_pointerEvents_og;
+                    delete frame._drag_pointerEvents_og;
+                });
+
                 dragTarget._drag.ondragend?.call(dragTarget._drag, dragTarget, { x: bounds.x + 'px', y: bounds.y + 'px' });
                 dragTarget = null;
             });
@@ -87,7 +93,7 @@ const WMJS = (function() {
                 
                 const left = (e.x - mousePosRel.x) + "px";
                 const top = (e.y - mousePosRel.y) + "px";
-        
+
                 dragTarget._drag.ondrag?.call(dragTarget._drag, dragTarget, { x: left, y: top });
         
                 dragTarget.style.left = left;
@@ -147,6 +153,11 @@ const WMJS = (function() {
                 }
 
                 dragTarget = element;
+
+                element.querySelectorAll("iframe").forEach((frame)=>{
+                    frame._drag_pointerEvents_og = frame.style.pointerEvents;
+                    frame.style.pointerEvents = "none";
+                });
 
                 options.ondragstart?.call(options, element, { rx: rx + "px", ry: ry + "px" });
             }
