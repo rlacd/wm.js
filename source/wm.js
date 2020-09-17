@@ -3,7 +3,9 @@ wm.js (C) acdra1n 2020. Licensed under GNU GPLv3.
 */
 
 /**
- * Polyfills
+ * Polyfills (for IE support and other unknown browsers)
+ *     Element.matches => https://developer.mozilla.org/en-US/docs/Web/API/Element/matches#Polyfill
+ *     Object.assign => https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign#Polyfill
  */
 
 /** Object.assign polyfill */
