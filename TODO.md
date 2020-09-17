@@ -2,7 +2,7 @@
 
  - Add animation support.
 
- - Add window drag and resize support.
+ - Add window resize support.
 
  - Use `getComputedStyle()` to find original display style of window element instead of always assuming flex.
 

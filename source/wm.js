@@ -7,14 +7,114 @@ wm.js (C) acdra1n 2020. Licensed under GNU GPLv3.
  */
 const WMJS = (function() {
     /**
+     * WMJS utility namespace.
+     */
+    const util = (function(){
+        /* Draggable utility */
+        
+        var dragTarget = null;
+        var mousePosRel = { x: 0, y: 0 }; // Mouse position relative to element.
+
+        window.onload = ()=> {
+            document.body.addEventListener('mouseup', function() {
+                if(!dragTarget)
+                    return;
+                
+                const bounds = dragTarget.getBoundingClientRect();
+                dragTarget._drag.ondragend?.call(dragTarget._drag, dragTarget, { x: bounds.x + 'px', y: bounds.y + 'px' });
+                dragTarget = null;
+            });
+        
+            document.body.addEventListener('mousemove', function(e) {
+                if(!dragTarget)
+                    return;
+                
+                const left = (e.x - mousePosRel.x) + "px";
+                const top = (e.y - mousePosRel.y) + "px";
+        
+                dragTarget._drag.ondrag?.call(dragTarget._drag, dragTarget, { x: left, y: top });
+        
+                dragTarget.style.left = left;
+                dragTarget.style.top = top;
+            });
+        }
+
+        /**
+         * Makes an element draggable.
+         * @param {HTMLElement} element The element to make draggable.
+         * @param {Object} opts The options to use to make an element draggable.
+         */
+        function _draggable(element, opts) {
+            if(opts == "destroy") {
+                if(!element._drag)
+                    return;
+
+                element.removeEventListener('mousedown', element._drag._evt_mousedown);
+                delete element._drag;
+                return;
+            }
+
+            if(element._drag)
+                return;
+
+            const options = {};
+
+            Object.assign(options, {
+                ondragstart: null,
+                ondrag: null,
+                ondragend: null,
+                cancel: ""
+            }, opts);
+
+            options.cancel = options.cancel.split(',');
+
+            options._evt_mousedown = function(e) {
+                for(let i = 0; i < options.cancel.length; i++) {
+                    const selector = options.cancel[i];
+                    
+                    let parEl = e.target;
+                    while(parEl != null) {
+                        if(parEl.matches(selector))
+                            return;
+                        
+                        parEl = parEl.parentElement;
+                    }
+                }
+
+                var rect = e.target.getBoundingClientRect();
+                var rx = e.clientX - rect.left;
+                var ry = e.clientY - rect.top;
+
+                mousePosRel = {
+                    x: rx,
+                    y: ry
+                }
+
+                dragTarget = element;
+
+                options.ondragstart?.call(options, element, { rx: rx + "px", ry: ry + "px" });
+            }
+
+            element._drag = options;
+            element.addEventListener('mousedown', options._evt_mousedown);
+        }
+
+        return {
+            draggable: _draggable
+        }
+    })();
+
+    /* ========================================================================================================================= */
+
+    /**
      * [Internal] Window manager window object.
      */
     class WM_Window {
         /**
          * Constructs a new window object.
-         * @param {Object} params The parameters to use.
+         * @param {WindowManager} wm The window manager.
          */
-        constructor(wm, params) {
+        constructor(wm) {
             /** @type {HTMLElement} */
             this.baseElement = document.createElement('div');
 
@@ -102,7 +202,9 @@ const WMJS = (function() {
                 this.activate();
             });
 
-            // 3 - Create draggable handlers/resizable handlers (TODO)
+            // 3 - Create draggable handler (resize is still WIP)
+            if(params.draggable)
+                this.setDraggable();
         }
 
         /**
@@ -111,6 +213,18 @@ const WMJS = (function() {
         _registerWindow() {    
             this.wm.container.appendChild(this.baseElement);
             this.registered = true;
+        }
+
+        /**
+         * [Internal] Makes the window draggable.
+         */
+        setDraggable(enabled = true) {
+            if(enabled) {
+                util.draggable(this.baseElement, {
+                    cancel: ".content,.control-box"
+                });
+            } else
+                util.draggable(this.baseElement, "destroy");
         }
         
         /**
@@ -132,6 +246,7 @@ const WMJS = (function() {
 
                 this.baseElement.classList.add('maximized');
                 this.maximized = true;
+                this.setDraggable(false);
 
                 this.onmaximize?.call();
             } else {
@@ -142,6 +257,7 @@ const WMJS = (function() {
 
                 this.baseElement.classList.remove('maximized');
                 this.maximized = false;
+                this.setDraggable(true);
 
                 this.onrestore?.call();
             }
@@ -343,7 +459,8 @@ const WMJS = (function() {
     }
 
     return {
-        WindowManager
+        WindowManager,
+        util
     }
 })();
 

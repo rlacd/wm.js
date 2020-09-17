@@ -45,11 +45,11 @@ wnd.show();
 
 ## Important Notes
 
-Currently, there is no window dragging and resizing system. If you want to resize and drag windows anyway, you can use jQuery UI (or any other dragging library). 
+Currently, there is no window resizing system. If you want to resize windows anyway, you can use jQuery UI (or any other library). 
 
 ⚠ Please note that this is not officially supported; you may encounter numerous bugs.
 
-To make a window resizable and draggable using jQuery UI, try the following code snippet:
+To make a window resizable using jQuery UI, try the following code snippet:
 
 ```javascript
 var wm = new WMJS.WindowManager(document.body);
@@ -57,9 +57,7 @@ var wnd = wm.createWindow({title: "test window"});
 
 wnd.show();
 
-$(wnd.baseElement).draggable({
-    cancel: ".content,.control-box"
-}).resizable({
+$(wnd.baseElement).resizable({
     handles: 'n, s, w, e, ne, se, sw, nw'
 });
 ```
