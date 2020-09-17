@@ -36,12 +36,15 @@ var wnd = wm.createWindow({
     height: 315,
     width: 450,
     x: 25,
-    y: 25
+    y: 25,
+    draggable: true
 });
 
 wnd.getContentContainer().innerHTML = "Test Window!";
 wnd.show();
 ```
+
+Not all properties have to be specified. If one is left empty, a default value will be used instead.
 
 ## Important Notes
 

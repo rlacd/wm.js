@@ -221,7 +221,7 @@ const WMJS = (function() {
         setDraggable(enabled = true) {
             if(enabled) {
                 util.draggable(this.baseElement, {
-                    cancel: ".content,.control-box"
+                    cancel: ".content,.control-box,.ui-resizable-handle"
                 });
             } else
                 util.draggable(this.baseElement, "destroy");
