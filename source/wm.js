@@ -457,6 +457,30 @@ const WMJS = (function() {
             else
                 this.wm.destroy(this)
         }
+
+        /**
+         * Sets the control box style.
+         * @param opts The style options to use.
+         */
+        setControlBoxStyle(opts) {
+            const options = {};
+
+            Object.assign(options, {
+                close: true,
+                maximize: true,
+                minimize: true
+            }, opts);
+
+            const controlBox = this.baseElement.querySelector(".control-box");
+
+            const closeBtn = controlBox.querySelector('button[role="close"]');
+            const minBtn = controlBox.querySelector('button[role="minimize"]');
+            const maxBtn = controlBox.querySelector('button[role="maximize"]');
+
+            options.close ? closeBtn.style.display = "" : closeBtn.style.display = "none";
+            options.minimize ? minBtn.style.display = "" : minBtn.style.display = "none";
+            options.maximize ? maxBtn.style.display = "" : maxBtn.style.display = "none";
+        }
     }
 
     /**
