@@ -179,3 +179,14 @@ wm.js (C) acdra1n 2020. Licensed under GNU GPLv3.
         opacity: 1;
     }
 }
+
+.wm-anim-zoomOut {
+    animation: wm-anim-zoomOut 125ms linear;
+}
+
+@keyframes wm-anim-zoomOut {
+    100% {
+        transform: scale(0);
+        opacity: 0;
+    }
+}

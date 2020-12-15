@@ -207,6 +207,7 @@ const WMJS = (function() {
             /** @type {WindowManager} */
             this.wm = wm;
             this.id = 0;
+            this.type = "normal";
 
             /* Events */
             this.onopen = null;
@@ -272,7 +273,7 @@ const WMJS = (function() {
             contentsContainer.classList.add('content');
 
             // 2 - Apply parameters
-            this.baseElement.style.position = "absolute";
+            this.baseElement.style.position = "fixed";
             this.baseElement.style.height = (typeof params.height == 'string') ? params.height : params.height + "px";
             this.baseElement.style.width = (typeof params.width == 'string') ? params.width : params.width + "px";
             this.baseElement.style.left = (typeof params.x == 'string') ? params.x : params.x + "px";
@@ -349,6 +350,8 @@ const WMJS = (function() {
                 this.baseElement.style.width = "100%";
                 this.baseElement.style.left = "0px";
                 this.baseElement.style.top = "0px";
+                this.baseElement.style.position = "relative";
+                this.baseElement.style.boxShadow = "none";
 
                 this.baseElement.classList.add('maximized');
                 this.maximized = true;
@@ -360,6 +363,8 @@ const WMJS = (function() {
                 this.baseElement.style.width = this._ogBounds.width;
                 this.baseElement.style.left = this._ogBounds.x;
                 this.baseElement.style.top = this._ogBounds.y;
+                this.baseElement.style.position = "fixed";
+                this.baseElement.style.boxShadow = "";
 
                 this.baseElement.classList.remove('maximized');
                 this.maximized = false;
@@ -421,8 +426,8 @@ const WMJS = (function() {
                 this._registerWindow();
                 this.onopen?.call();
 
-                if(wm.animations.wndOpen)
-                    util.animate(this.baseElement, wm.animations.wndOpen);
+                if(this.wm.animations.wndOpen)
+                    util.animate(this.baseElement, this.wm.animations.wndOpen);
             }
             
             this.baseElement.style.display = "flex";
@@ -447,7 +452,10 @@ const WMJS = (function() {
          * Closes the window. Once it has been closed, the window is destroyed.
          */
         close() {
-            this.wm.destroy(this);
+            if(this.wm.animations.wndClose)
+                util.animate(this.baseElement, this.wm.animations.wndClose).then(()=>this.wm.destroy(this));
+            else
+                this.wm.destroy(this)
         }
     }
 
@@ -478,12 +486,20 @@ const WMJS = (function() {
             this.zIndexStartOffset = 10;
 
             this.animations = {
-                wndOpen: null
+                wndOpen: null,
+                wndClose: null
             }
 
             this.behavior = {
-                applyDragStyles: false
+                applyDragStyles: false,
+                useSimpleGraphics: false
             }
+
+            /** Events */
+            this.onwindowcreate = null;
+            this.onwindowdestroy = null;
+            this.onwindowactivate = null;
+            this.onwindowdeactivate = null;
 
             /** Internal variables (these should not be touched and are therefore prefixed) */
             this._createdWindows = 0;
@@ -524,6 +540,7 @@ const WMJS = (function() {
             wnd.id = (this._createdWindows++);
             wnd._createWindow(options);
             this.windows.push(wnd);
+            this.onwindowcreate?.call(this, wnd, options);
             return wnd;
         }
 
@@ -573,10 +590,10 @@ const WMJS = (function() {
             const r = this.container.getBoundingClientRect();
 
             const statsEl = this._debugContainer.querySelector("span");
-            statsEl.innerText = "\n" +
-            "Created Windows: " + this._createdWindows + "\n" +
-            "Loaded Windows: " + this.windows.length + "\n" +
-            "Active Window: " + (()=> {
+            statsEl.innerHTML = "\n<u>:: General Information</u>\n" +
+            " <b>Created Windows:</b> " + this._createdWindows + "\n" +
+            " <b>Loaded Windows:</b> " + this.windows.length + "\n" +
+            " <b>Active Window:</b> " + (()=> {
                 const wnd = this.getActiveWindow();
                 if(!wnd)
                     return "null";
@@ -585,7 +602,9 @@ const WMJS = (function() {
                     return wnd.id + " => [" + wndBounds.width + "x" + wndBounds.height + "] (" + wndBounds.x + ", " + wndBounds.y + ")";
                 }
             })() + "\n" + 
-            "WM Area: " + r.width + "x" + r.height;
+            " <b>WM Area: </b>" + r.width + "x" + r.height + "\n\n<u>:: Features</u>\n" +
+            " <b>Fast Window Drag</b>: " + (this.behavior.applyDragStyles ? "Yes": "No") + "\n" +
+            " <b>Simple Graphics Mode</b>: " + (this.behavior.useSimpleGraphics ? "Yes": "No");
         }
 
         /**
@@ -610,12 +629,8 @@ const WMJS = (function() {
          * Destroys all windows. No events will be executed upon destruction.
          */
         destroyAll() {
-            this.windows.forEach((v, i)=>{
-                this.container.removeChild(v.baseElement);
-                v.wm = null;
-                v.baseElement = null;
-                this.windows[i] = null;
-                delete this.windows[i];
+            this.windows.forEach((v)=>{
+                this.destroy(v);
             });
 
             this.windows = [];
@@ -631,6 +646,7 @@ const WMJS = (function() {
             if(!wnd.wm)
                 return;
 
+            this.onwindowdestroy?.call(this, wnd);
             this.container.removeChild(wnd.baseElement);
             wnd.baseElement = null;
             const wndIndex = this.windows.indexOf(wnd);
@@ -649,6 +665,7 @@ const WMJS = (function() {
                 if(a[i].baseElement.classList.contains('active')) {
                     a[i].baseElement.classList.remove('active');
                     a[i].ondeactivate?.call();
+                    this.onwindowdeactivate?.call(this, a[i]);
                 }
             });
         }
@@ -668,6 +685,7 @@ const WMJS = (function() {
                 if(a[i].baseElement.classList.contains('active')) {
                     a[i].baseElement.classList.remove('active');
                     a[i].ondeactivate?.call();
+                    this.onwindowdeactivate?.call(this, a[i]);
                 }
 
                 const zIndex = parseInt(w.baseElement.style.zIndex);
@@ -679,11 +697,13 @@ const WMJS = (function() {
 
             wnd.baseElement.style.zIndex = highestZIndex + 1;
             wnd.baseElement.classList.add('active');
+            this.onwindowactivate?.call(this, wnd);
         }
     }
 
     return {
         WindowManager,
+        WM_Window,
         util
     }
 })();
