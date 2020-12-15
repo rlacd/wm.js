@@ -166,8 +166,23 @@ const WMJS = (function() {
             element.addEventListener('mousedown', options._evt_mousedown);
         }
 
+        /* Animation utility */
+        const animate = (element, animation) => {
+            return new Promise((resolve) => {
+                const node = (element instanceof HTMLElement) ? element : document.querySelector(element);
+            
+                node.classList.add(animation);
+            
+                node.addEventListener('animationend', ()=>{
+                    node.classList.remove(animation);
+                    resolve();
+                }, { once: true });
+            });
+        }
+
         return {
-            draggable: _draggable
+            draggable: _draggable,
+            animate
         }
     })();
 
@@ -194,14 +209,17 @@ const WMJS = (function() {
             this.id = 0;
 
             /* Events */
-            this.onopen = function(e) { }
-            this.onclose = function(e) { }
-            this.onshown = function(e) { }
-            this.onmaximize = function(e) { }
-            this.onminimize = function(e) { }
-            this.onrestore = function(e) { }
-            this.onactivate = function(e) { }
-            this.ondeactivate = function(e) { }
+            this.onopen = null;
+            this.onclose = null;
+            this.onshown = null;
+            this.onmaximize = null;
+            this.onminimize = null;
+            this.onrestore = null;
+            this.onactivate = null;
+            this.ondeactivate = null;
+            this.ondragstart = null;
+            this.ondragend = null;
+            this.ondrag = null;
         }
 
         /**
@@ -265,9 +283,11 @@ const WMJS = (function() {
             //  2.1 - Register components
             this.baseElement.appendChild(titleBar);
             this.baseElement.appendChild(contentsContainer);
-            this.baseElement.addEventListener('mousedown', ()=>{
+            this.baseElement.addEventListener('mousedown', (e)=>{
                 this.activate();
             });
+
+            this.baseElement.addEventListener('click', (e)=>e.stopPropagation());
 
             // 3 - Create draggable handler (resize is still WIP)
             if(params.draggable)
@@ -288,7 +308,26 @@ const WMJS = (function() {
         setDraggable(enabled = true) {
             if(enabled) {
                 util.draggable(this.baseElement, {
-                    cancel: ".content,.control-box,.ui-resizable-handle"
+                    cancel: ".content,.control-box,.ui-resizable-handle",
+                    ondragstart: (a, b)=>{
+                        // Enable drag shadow if behavior is enabled
+                        if(this.wm.behavior.applyDragStyles)
+                            this.baseElement.classList.add('dragging');
+
+                        // Call window event
+                        this.ondragstart?.call(this, a, b);
+                    },
+                    ondragend: (a, b)=>{
+                        if(this.wm.behavior.applyDragStyles)
+                            this.baseElement.classList.remove('dragging');
+
+                        // Call window event
+                        this.ondragend?.call(this, a, b);
+                    },
+                    ondrag: (a, b)=>{
+                        // Call window event
+                        this.ondrag?.call(this, a, b);
+                    }
                 });
             } else
                 util.draggable(this.baseElement, "destroy");
@@ -364,6 +403,14 @@ const WMJS = (function() {
         }
 
         /**
+         * Sets the window title.
+         * @param {String} text The window title to use.
+         */
+        setTitle(text) {
+            this.baseElement.querySelector(".titlebar>.title").innerText = text;
+        }
+
+        /**
          * Shows the window. If the window is already shown, this function will do nothing.
          */
         show() {
@@ -373,6 +420,9 @@ const WMJS = (function() {
             if(!this.registered) {
                 this._registerWindow();
                 this.onopen?.call();
+
+                if(wm.animations.wndOpen)
+                    util.animate(this.baseElement, wm.animations.wndOpen);
             }
             
             this.baseElement.style.display = "flex";
@@ -427,6 +477,14 @@ const WMJS = (function() {
             this.windows = [];
             this.zIndexStartOffset = 10;
 
+            this.animations = {
+                wndOpen: null
+            }
+
+            this.behavior = {
+                applyDragStyles: false
+            }
+
             /** Internal variables (these should not be touched and are therefore prefixed) */
             this._createdWindows = 0;
 
@@ -440,9 +498,6 @@ const WMJS = (function() {
          */
         _setupContainerEvents() {
             this.container.addEventListener('click', (e)=>{
-                if(e.target != this.container)
-                    return;
-                    
                 this.deactivateAll();
             });
         }
@@ -507,17 +562,48 @@ const WMJS = (function() {
             this._updateDebugInfo();
             
             // Schedule debug updates every 500 ms
-            this._debugProc = setInterval(()=>this._updateDebugInfo, 500);
+            this._debugProc = setInterval(()=>this._updateDebugInfo(), 500);
         }
 
         /**
          * Called whenever to update the debug info container.
          */
         _updateDebugInfo() {
+            /** @type {DOMRect} */
+            const r = this.container.getBoundingClientRect();
+
             const statsEl = this._debugContainer.querySelector("span");
             statsEl.innerText = "\n" +
             "Created Windows: " + this._createdWindows + "\n" +
-            "Loaded Windows: " + this.windows.length;
+            "Loaded Windows: " + this.windows.length + "\n" +
+            "Active Window: " + (()=> {
+                const wnd = this.getActiveWindow();
+                if(!wnd)
+                    return "null";
+                else {
+                    const wndBounds = wnd.getWindowRect();
+                    return wnd.id + " => [" + wndBounds.width + "x" + wndBounds.height + "] (" + wndBounds.x + ", " + wndBounds.y + ")";
+                }
+            })() + "\n" + 
+            "WM Area: " + r.width + "x" + r.height;
+        }
+
+        /**
+         * Returns the active window.
+         */
+        getActiveWindow() {
+            /** @type {WM_Window} */
+            let wnd = null;
+
+            this.windows.forEach((w)=>{
+                if(w == null)
+                    return;
+                
+                if(w.baseElement.classList.contains('active'))
+                    wnd = w;
+            });
+
+            return wnd;
         }
 
         /**

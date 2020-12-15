@@ -4,12 +4,21 @@ wm.js (C) acdra1n 2020. Licensed under GNU GPLv3.
 
 /* Default Window Manager styles */
 
+:root {
+    --window-bg: #dedede;
+    --window-shadow: black;
+    --window-titlebar-bg: white;
+    --window-title-deactivated: #bcbcbc;
+    --window-title-active: black;
+    --window-content-main-color: black;
+}
+
 .wm-window {
-    background-color: #dedede;
+    background-color: var(--window-bg);
     border-radius: 3px;
     display: flex;
     flex-direction: column;
-    box-shadow: black 0px 0px 3px 0px;
+    box-shadow: var(--window-shadow) 0px 0px 3px 0px;
 }
 
 .wm-window.maximized {
@@ -22,8 +31,8 @@ wm.js (C) acdra1n 2020. Licensed under GNU GPLv3.
     flex-direction: row;
     width: 100%;
     height: 32px;
-    background-color: white;
-    color: #bcbcbc;
+    background-color: var(--window-titlebar-bg);
+    color: var(--window-title-deactivated);
     user-select: none;
     -moz-user-select: none;
     -webkit-user-select: none;
@@ -50,6 +59,7 @@ wm.js (C) acdra1n 2020. Licensed under GNU GPLv3.
 .wm-window>.titlebar>.control-box {
     height: 100%;
     display: flex;
+    font-size: 13px;
 }
 
 .wm-window>.titlebar>.control-box>button {
@@ -90,18 +100,31 @@ wm.js (C) acdra1n 2020. Licensed under GNU GPLv3.
     display: flex;
     flex: 1;
     box-sizing: border-box;
+    color: var(--window-content-main-color);
+    line-height: 1.2;
+    font-family: tahoma;
+    font-size: 13px;
+    overflow: auto;
 }
 
 .wm-window.active {
-    box-shadow: black 0px 0px 5px 0px;
+    box-shadow: var(--window-shadow) 0px 0px 5px 0px;
 }
 
 .wm-window.active>.titlebar {
-    color: black;
+    color: var(--window-title-active);
 }
 
 .wm-window.active>.titlebar>.control-box>button {
-    color: black;
+    color: var(--window-title-active);
+}
+
+.wm-window.dragging {
+    opacity: 0.6;
+}
+
+.wm-window.dragging>.content {
+    display: none;
 }
 
 /* Misc styles */
@@ -117,4 +140,42 @@ wm.js (C) acdra1n 2020. Licensed under GNU GPLv3.
     padding: 10px;
     pointer-events: none;
     z-index: 10000000;
+}
+
+/* Custom scrollbar */
+/* width */
+.wm-window ::-webkit-scrollbar {
+    width: 6px;
+}
+
+/* Track */
+.wm-window ::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+}
+
+/* Handle */
+.wm-window ::-webkit-scrollbar-thumb {
+    background: #bfbfbf; 
+}
+
+/* Handle on hover */
+.wm-window ::-webkit-scrollbar-thumb:hover {
+    background: #aaaaaa; 
+}
+
+/* Animations */
+.wm-anim-zoomIn {
+    animation: wm-anim-zoomIn 125ms linear;
+}
+
+@keyframes wm-anim-zoomIn {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
