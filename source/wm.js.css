@@ -103,3 +103,18 @@ wm.js (C) acdra1n 2020. Licensed under GNU GPLv3.
 .wm-window.active>.titlebar>.control-box>button {
     color: black;
 }
+
+/* Misc styles */
+.wm-ui-dbginfo {
+    position: fixed;
+    top: 0;
+    right: 0;
+    margin: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    color: white;
+    font-family: monospace;
+    white-space: pre;
+    padding: 10px;
+    pointer-events: none;
+    z-index: 10000000;
+}

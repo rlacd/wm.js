@@ -431,6 +431,20 @@ const WMJS = (function() {
             this._createdWindows = 0;
 
             containerEl._wm = {};
+
+            this._setupContainerEvents();
+        }
+
+        /**
+         * Sets up events for the window manager container.
+         */
+        _setupContainerEvents() {
+            this.container.addEventListener('click', (e)=>{
+                if(e.target != this.container)
+                    return;
+                    
+                this.deactivateAll();
+            });
         }
 
         /**
@@ -467,6 +481,46 @@ const WMJS = (function() {
         }
 
         /**
+         * Displays debug information in the window container.
+         */
+        showDebugInfo() {
+            if(this._debugContainer)
+                return;
+            
+            this._debugContainer = document.createElement('div');
+            this._debugContainer.classList.add('wm-ui-dbginfo');
+            
+            // Add title
+            const titleEl = document.createElement('b');
+            titleEl.innerText = "wm.js alpha";
+            titleEl.style.textDecoration = "underline";
+            titleEl.style.display = "block";
+            this._debugContainer.appendChild(titleEl);
+
+            // Add stats
+            const statsEl = document.createElement('span');
+            this._debugContainer.appendChild(statsEl);
+
+            this.container.appendChild(this._debugContainer);
+
+            // Update stats
+            this._updateDebugInfo();
+            
+            // Schedule debug updates every 500 ms
+            this._debugProc = setInterval(()=>this._updateDebugInfo, 500);
+        }
+
+        /**
+         * Called whenever to update the debug info container.
+         */
+        _updateDebugInfo() {
+            const statsEl = this._debugContainer.querySelector("span");
+            statsEl.innerText = "\n" +
+            "Created Windows: " + this._createdWindows + "\n" +
+            "Loaded Windows: " + this.windows.length;
+        }
+
+        /**
          * Destroys all windows. No events will be executed upon destruction.
          */
         destroyAll() {
@@ -477,6 +531,8 @@ const WMJS = (function() {
                 this.windows[i] = null;
                 delete this.windows[i];
             });
+
+            this.windows = [];
         }
 
         /**
@@ -493,7 +549,22 @@ const WMJS = (function() {
             wnd.baseElement = null;
             const wndIndex = this.windows.indexOf(wnd);
             this.windows[wndIndex] = null;
-            delete this.windows[wndIndex];
+            this.windows.splice(wndIndex, 1);
+        }
+
+        /**
+         * Deactivates all windows.
+         */
+        deactivateAll() {
+            this.windows.forEach((w, i, a)=>{
+                if(a[i] == null)
+                    return;
+                
+                if(a[i].baseElement.classList.contains('active')) {
+                    a[i].baseElement.classList.remove('active');
+                    a[i].ondeactivate?.call();
+                }
+            });
         }
 
         /**
