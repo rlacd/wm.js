@@ -242,7 +242,7 @@ const WMJS = (function() {
             const controlBox = document.createElement('div');
             controlBox.classList.add('control-box');
             controlBox.insertAdjacentHTML('beforeend', '<button role="minimize">─</button>'
-             + (params.resizable ? '<button role="maximize">▢</button>' : '') //TODO check if window is resizable
+             + '<button role="maximize">▢</button>'
              + '<button role="close">✕</button>');
 
             if(params.resizable) {
@@ -253,17 +253,18 @@ const WMJS = (function() {
                 controlBox.querySelector('button[role="maximize"]').addEventListener('click', ()=>{
                     this.toggleMaximize();
                 });
-
-                controlBox.querySelector('button[role="minimize"]').addEventListener('click', ()=>{
-                    this.hide();
-                    this.onminimize?.call();
-                });
-
-                controlBox.querySelector('button[role="close"]').addEventListener('click', ()=>{
-                    this.onclose?.call();
-                    this.close();
-                });
             }
+
+            controlBox.querySelector('button[role="minimize"]').addEventListener('click', ()=>{
+                this.hide();
+                this.onminimize?.call();
+            });
+
+            controlBox.querySelector('button[role="close"]').addEventListener('click', ()=>{
+                this.onclose?.call();
+                this.close();
+            });
+            
 
             titleBar.appendChild(titleBarTitle);
             titleBar.appendChild(controlBox);
@@ -623,10 +624,10 @@ const WMJS = (function() {
                     return "null";
                 else {
                     const wndBounds = wnd.getWindowRect();
-                    return wnd.id + " => [" + wndBounds.width + "x" + wndBounds.height + "] (" + wndBounds.x + ", " + wndBounds.y + ")";
+                    return wnd.id + " => [" + Math.round(wndBounds.width) + "x" + Math.round(wndBounds.height) + "] (" + Math.round(wndBounds.x) + ", " + Math.round(wndBounds.y) + ")";
                 }
             })() + "\n" + 
-            " <b>WM Area: </b>" + r.width + "x" + r.height + "\n\n<u>:: Features</u>\n" +
+            " <b>WM Area: </b>" + Math.round(r.width) + "x" + Math.round(r.height) + "\n\n<u>:: Features</u>\n" +
             " <b>Fast Window Drag</b>: " + (this.behavior.applyDragStyles ? "Yes": "No") + "\n" +
             " <b>Simple Graphics Mode</b>: " + (this.behavior.useSimpleGraphics ? "Yes": "No");
         }
