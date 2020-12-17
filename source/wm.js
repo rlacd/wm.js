@@ -506,8 +506,12 @@ const WMJS = (function() {
 
             /** Variables */
             this.container = containerEl;
+            
             /** @type {WM_Window[]} */
             this.windows = [];
+
+            /* Window behaviors and placement */
+
             this.zIndexStartOffset = 10;
 
             this.animations = {

@@ -1,0 +1,22 @@
+{
+  "name": "wm-js",
+  "version": "1.0.0",
+  "description": "A fast and efficient window manager for the web.",
+  "scripts": {
+    "build": "webpack --config webpack.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/acdra1n/wm.js.git"
+  },
+  "keywords": [
+    "window-manager",
+    "javascript"
+  ],
+  "author": "acdra1n",
+  "license": "SEE LICENSE IN LICENSE.txt",
+  "bugs": {
+    "url": "https://github.com/acdra1n/wm.js/issues"
+  },
+  "homepage": "https://github.com/acdra1n/wm.js#readme"
+}
