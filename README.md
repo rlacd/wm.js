@@ -12,9 +12,15 @@ This library is particularly useful for web apps which utilize custom dialogs an
 
 ## How to install
 
-Reference either the minified files (found in `dist/`) or the source files (found in `source/`) in your HTML document to get started using wm.js.
+Reference either the minified files (found in `dist/`) to get started using wm.js.
 
 Please note that the source files require an ES6 compliant browser. The distribution files have been transpiled to ES5 compatible syntax, to preserve compatibility with older browser.
+
+## How to build
+
+wm.js uses `webpack` as its build system. To build wm.js from source, run `npm install` to install dependencies, then run `npm run build` to build a new version.
+
+The output files will be placed in `dist/` by default.
 
 ## Compatibility
 
@@ -37,7 +43,10 @@ var wnd = wm.createWindow({
     width: 450,
     x: 25,
     y: 25,
-    draggable: true
+    minHeight: 200,
+    minWidth: 200,
+    draggable: true,
+    resizable: true
 });
 
 wnd.setHtml("Test Window!");
@@ -45,25 +54,6 @@ wnd.show();
 ```
 
 Not all properties have to be specified. If one is left empty, a default value will be used instead.
-
-## Important Notes
-
-Currently, there is no window resizing system. If you want to resize windows anyway, you can use jQuery UI (or any other library). 
-
-⚠ Please note that this is not officially supported; you may encounter numerous bugs.
-
-To make a window resizable using jQuery UI, try the following code snippet:
-
-```javascript
-var wm = new WMJS.WindowManager(document.body);
-var wnd = wm.createWindow({title: "test window"});
-
-wnd.show();
-
-$(wnd.baseElement).resizable({
-    handles: 'n, s, w, e, ne, se, sw, nw'
-});
-```
 
 ## Filing issues
 
