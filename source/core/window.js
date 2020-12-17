@@ -4,6 +4,7 @@ wm.js (C) acdra1n 2020. Licensed under GNU GPLv3.
 
 import { animate } from "../util/animation";
 import { draggable } from "../util/draggable";
+import { resizable } from "../util/resizable";
 
 /**
  * Window manager window object.
@@ -111,6 +112,9 @@ export class WM_Window {
         // 3 - Create draggable handler (resize is still WIP)
         if(params.draggable)
             this.setDraggable();
+
+        if(params.resizable)
+            this.setResizable(params.minWidth, params.minHeight);
     }
 
     /**
@@ -127,7 +131,7 @@ export class WM_Window {
     setDraggable(enabled = true) {
         if(enabled) {
             draggable(this.baseElement, {
-                cancel: ".content,.control-box,.ui-resizable-handle",
+                cancel: ".content,.control-box,.ui-resizable-handle,.wm-resizer",
                 ondragstart: (a, b)=>{
                     // Enable drag shadow if behavior is enabled
                     if(this.wm.behavior.applyDragStyles)
@@ -150,6 +154,22 @@ export class WM_Window {
             });
         } else
             draggable(this.baseElement, "destroy");
+    }
+
+    /**
+     * [Internal] Makes the window resizable.
+     */
+    setResizable(mw, mh, enabled = true) {
+        if(enabled) {
+            resizable(this.baseElement, {
+                onresizestart: ()=>{
+                    this.activate();
+                },
+                minWidth: mw,
+                minHeight: mh
+            });
+        } else
+            resizable(this.baseElement, "destroy");
     }
     
     /**

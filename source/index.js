@@ -16,11 +16,31 @@ import { WindowManager } from "./core/wm";
  */
 const WMJS = (function() {
     return {
+        /**
+         * @member util
+         */
         util: {
+            /**
+             * Makes an element draggable.
+             * @param {HTMLElement} element The element to make draggable.
+             * @param {Object} opts The options to use to make an element draggable.
+             */
             draggable,
+
+            /**
+             * Animates an element.
+             * @param {HTMLElement} element The element to animate.
+             * @param {String} animation The name of the animation.
+             */
             animate
         },
+        /**
+         * Window manager object.
+         */
         WindowManager,
+        /**
+         * Window manager window object.
+         */
         WM_Window
     }
 })();

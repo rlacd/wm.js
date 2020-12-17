@@ -127,6 +127,80 @@ wm.js (C) acdra1n 2020. Licensed under GNU GPLv3.
     display: none;
 }
 
+/* Resizer styles */
+.wm-resizer {
+    position: absolute;
+    z-index: 2;
+    opacity: 0.5;
+}
+
+.wm-resizer.se {
+    width: 12px;
+    height: 12px;
+    background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABUSURBVChTlZJbCkAhCESt/S9CV2p3qIkeN0rh4IAH/TG5u0Qqt34tM6ubceGGqn6t5m24MspgGq6MMvMmkT8ZTBI5yaAHcpKZQzIIyeBZZg6+hkgBOwlJNuTQ5SoAAAAASUVORK5CYII=');
+    right: 0;
+    bottom: 0;
+    cursor: se-resize;
+    z-index: 3;
+    opacity: 1;
+}
+
+.wm-resizer.ne {
+    width: 10px;
+    height: 10px;
+    right: 0;
+    top: 0;
+    cursor: ne-resize;
+}
+
+.wm-resizer.e {
+    width: 10px;
+    height: calc(100% - 20px);
+    right: 0;
+    top: 10px;
+    cursor: e-resize;
+}
+
+.wm-resizer.s {
+    width: calc(100% - 20px);
+    height: 10px;
+    left: 10px;
+    bottom: 0;
+    cursor: s-resize;
+}
+
+.wm-resizer.sw {
+    width: 10px;
+    height: 10px;
+    left: 0;
+    bottom: 0;
+    cursor: sw-resize;
+}
+
+.wm-resizer.w {
+    width: 10px;
+    height: calc(100% - 20px);
+    left: 0;
+    top: 10px;
+    cursor: e-resize;
+}
+
+.wm-resizer.nw {
+    width: 10px;
+    height: 10px;
+    left: 0;
+    top: 0;
+    cursor: nw-resize;
+}
+
+.wm-resizer.n {
+    width: calc(100% - 20px);
+    height: 10px;
+    left: 10px;
+    top: 0;
+    cursor: n-resize;
+}
+
 /* Misc styles */
 .wm-ui-dbginfo {
     position: fixed;

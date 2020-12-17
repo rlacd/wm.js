@@ -79,6 +79,8 @@ export class WindowManager {
             title: "Untitled",
             height: 315,
             width: 450,
+            minHeight: 200,
+            minWidth: 200,
             x: 10,
             y: 10,
             resizable: true,
