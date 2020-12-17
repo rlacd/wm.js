@@ -40,7 +40,7 @@ var wnd = wm.createWindow({
     draggable: true
 });
 
-wnd.getContentContainer().innerHTML = "Test Window!";
+wnd.setHtml("Test Window!");
 wnd.show();
 ```
 

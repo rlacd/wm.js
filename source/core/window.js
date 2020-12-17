@@ -215,6 +215,19 @@ export class WM_Window {
     }
 
     /**
+     * Sets the html contents of the window.
+     * @param {String} html The HTML to use.
+     */
+    setHtml(html) {
+        const contents = this.getContentContainer();
+
+        while(contents.firstChild)
+            contents.removeChild(contents.firstChild);
+
+        contents.innerHTML = html;
+    }
+
+    /**
      * Activates the window
      */
     activate() {
