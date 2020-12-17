@@ -214,6 +214,7 @@ wm.js (C) acdra1n 2020. Licensed under GNU GPLv3.
     padding: 10px;
     pointer-events: none;
     z-index: 10000000;
+    user-select: none;
 }
 
 /* Custom scrollbar */
