@@ -113,8 +113,11 @@ export class WM_Window {
         if(params.draggable)
             this.setDraggable();
 
+        this.minWidth = params.minWidth;
+        this.minHeight = params.minHeight;
+
         if(params.resizable)
-            this.setResizable(params.minWidth, params.minHeight);
+            this.setResizable();
     }
 
     /**
@@ -159,14 +162,14 @@ export class WM_Window {
     /**
      * [Internal] Makes the window resizable.
      */
-    setResizable(mw, mh, enabled = true) {
+    setResizable(enabled = true) {
         if(enabled) {
             resizable(this.baseElement, {
                 onresizestart: ()=>{
                     this.activate();
                 },
-                minWidth: mw,
-                minHeight: mh
+                minWidth: this.minWidth,
+                minHeight: this.minHeight
             });
         } else
             resizable(this.baseElement, "destroy");
@@ -194,6 +197,8 @@ export class WM_Window {
             this.baseElement.classList.add('maximized');
             this.maximized = true;
             this.setDraggable(false);
+            
+            this.baseElement.querySelectorAll('.wm-resizer').forEach((v)=>v.style.display = "none");
 
             this.onmaximize?.call();
         } else {
@@ -207,6 +212,8 @@ export class WM_Window {
             this.baseElement.classList.remove('maximized');
             this.maximized = false;
             this.setDraggable(true);
+
+            this.baseElement.querySelectorAll('.wm-resizer').forEach((v)=>v.style.display = "");
 
             this.onrestore?.call();
         }

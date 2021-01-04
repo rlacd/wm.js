@@ -23,9 +23,10 @@ export function resizable(_element, opts) {
             return;
 
         for(let el of element.children) {
-            if(el.classList.contains("wm-resizer"))
-                element.removeChild(el);
+            /** TODO implement */
         }
+
+        element._rsz = null;
         return;
     }
 
@@ -71,7 +72,7 @@ function initDrag(e, target, handle) {
 
     resizeTarget._rsz.onresizestart?.call(resizeTarget._rsz, { startX, startY, startWidth, startHeight });
 }
- 
+
 function doDrag(e) {
     let sz = {
         width: startWidth + e.clientX - startX,
@@ -157,7 +158,7 @@ function doDrag(e) {
 
     resizeTarget._rsz.onresize?.call(resizeTarget._rsz, sz);
 }
- 
+
 function stopDrag(e) {
     resizeTarget.style.userSelect = "";
     document.documentElement.removeEventListener('mousemove', doDrag, false);
